@@ -1,0 +1,30 @@
+apiVersion: 1
+
+# Tempo + Prometheus datasources so a human can eyeball seeded traces in
+# Grafana's Explore view alongside the automated harness. The Tempo datasource
+# pins tenant-a via the X-Scope-OrgID header (multi-tenancy is on).
+datasources:
+  - name: Tempo
+    type: tempo
+    access: proxy
+    uid: tempo
+    url: http://tempo:3200
+    jsonData:
+      httpHeaderName1: X-Scope-OrgID
+      tracesToMetrics:
+        datasourceUid: prometheus
+      serviceMap:
+        datasourceUid: prometheus
+      nodeGraph:
+        enabled: true
+    secureJsonData:
+      httpHeaderValue1: tenant-a
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    uid: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      httpMethod: POST

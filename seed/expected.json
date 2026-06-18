@@ -1,0 +1,53 @@
+{
+  "seeded_at_unix_ns": 1781742705869825000,
+  "tenant_a": {
+    "all_trace_ids": [
+      "003c888be3893e356a4430424e1b426a",
+      "07043018a086a39070482905d8e1746c",
+      "3556b6c185c733fe0fabecb2e71113d3",
+      "3793ae6d21f8900df9db9ae6746e156a",
+      "45376928cf63af8077776881f451fa01",
+      "968683312ac5896fb2031e7a87613558",
+      "d86620899aef21e99a401fba297a844e"
+    ],
+    "error_trace_ids": [
+      "968683312ac5896fb2031e7a87613558"
+    ],
+    "frontend_trace_count": 4,
+    "frontend_trace_ids": [
+      "07043018a086a39070482905d8e1746c",
+      "3556b6c185c733fe0fabecb2e71113d3",
+      "3793ae6d21f8900df9db9ae6746e156a",
+      "45376928cf63af8077776881f451fa01"
+    ],
+    "multiservice_trace_id": "07043018a086a39070482905d8e1746c",
+    "services": [
+      "cart",
+      "checkout",
+      "frontend",
+      "inventory",
+      "payment"
+    ],
+    "slow_trace_ids": [
+      "d86620899aef21e99a401fba297a844e"
+    ],
+    "tenant": "tenant-a",
+    "trace_count": 7,
+    "unique_attr": {
+      "key": "promo.code",
+      "trace_id": "003c888be3893e356a4430424e1b426a",
+      "value": "UNIQUE-SEED-XYZ"
+    }
+  },
+  "tenant_b": {
+    "all_trace_ids": [
+      "39c48f60de603e3d83f321cdfe87d8af",
+      "5a0d05daa19ed8d731fafcdde9bdf04a"
+    ],
+    "services": [
+      "billing"
+    ],
+    "tenant": "tenant-b",
+    "trace_count": 2
+  }
+}

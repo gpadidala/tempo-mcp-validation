@@ -1,0 +1,29 @@
+# Per-tenant runtime overrides (loaded via per_tenant_override_config).
+#
+# IMPORTANT: this file uses Tempo's LEGACY FLAT key format (e.g.
+# `ingestion_rate_limit_bytes`), NOT the nested structure used by
+# `overrides.defaults` in tempo.yaml. A per-tenant entry replaces the default
+# limit set for that tenant, so ingestion limits are restated here — otherwise
+# they fall back to 0 bytes/s and all ingestion is rejected.
+#
+# Two tenants exist so the isolation test can prove tenant-a cannot read
+# tenant-b's traces. tenant-b intentionally runs fewer metrics-generator
+# processors to demonstrate per-tenant divergence is honored.
+overrides:
+  tenant-a:
+    ingestion_rate_strategy: local
+    ingestion_rate_limit_bytes: 20000000
+    ingestion_burst_size_bytes: 30000000
+    max_traces_per_user: 100000
+    metrics_generator_processors:
+      - service-graphs
+      - span-metrics
+      - local-blocks
+  tenant-b:
+    ingestion_rate_strategy: local
+    ingestion_rate_limit_bytes: 20000000
+    ingestion_burst_size_bytes: 30000000
+    max_traces_per_user: 100000
+    metrics_generator_processors:
+      - service-graphs
+      - span-metrics

@@ -1,0 +1,83 @@
+# Grafana Tempo — single-binary config for the MCP validation harness.
+# The ONLY system under test is the native MCP server built into the
+# query-frontend. See: https://grafana.com/docs/tempo/latest/api_docs/mcp-server/
+#
+# Multi-tenancy is ON so the X-Scope-OrgID isolation tests are real, not
+# theatre. Every request (ingest, query, AND the MCP endpoint) must carry the
+# header — that is exactly the behavior we want to validate.
+
+multitenancy_enabled: true
+stream_over_http_enabled: true
+
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095
+  log_level: info
+
+# ---------------------------------------------------------------------------
+# The feature under test: native MCP server on the query-frontend.
+# Reachable at http://localhost:3200/api/mcp (streamable HTTP).
+# ---------------------------------------------------------------------------
+query_frontend:
+  mcp_server:
+    enabled: true
+  search:
+    duration_slo: 5s
+    throughput_bytes_slo: 1.073741824e+09
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+ingester:
+  # Flush quickly so seeded traces are queryable within seconds, not minutes.
+  max_block_duration: 5m
+  complete_block_timeout: 10s
+
+compactor:
+  compaction:
+    block_retention: 1h
+
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+  traces_storage:
+    path: /var/tempo/generator/traces
+  processor:
+    local_blocks:
+      filter_server_spans: false
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+# Runtime per-tenant overrides file is loaded from overrides.yaml so we can
+# diverge tenant-a vs tenant-b behavior for isolation testing.
+overrides:
+  per_tenant_override_config: /etc/tempo/overrides.yaml
+  # Providing `defaults` replaces Tempo's built-in default limits wholesale, so
+  # ingestion limits must be set explicitly or they default to 0 (everything is
+  # rate-limited to nothing). These are generous values for a local dev seed.
+  defaults:
+    ingestion:
+      rate_strategy: local
+      rate_limit_bytes: 20000000
+      burst_size_bytes: 30000000
+      max_traces_per_user: 100000
+    metrics_generator:
+      processors: [service-graphs, span-metrics, local-blocks]
