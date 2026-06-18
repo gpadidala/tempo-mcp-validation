@@ -1,0 +1,173 @@
+{
+  "uid": "tempo-mcp-server",
+  "title": "Tempo MCP Server",
+  "tags": ["tempo", "mcp"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROM",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "prometheus" },
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "MCP server — overview",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "MCP calls (total)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "short" } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum(tempo_query_frontend_mcp_calls_total)" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "MCP call rate (calls/s)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "reqps" } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum(rate(tempo_query_frontend_mcp_calls_total[5m]))" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "MCP endpoint error ratio",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" }, "unit": "percentunit",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.05 }
+          ] }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum(rate(tempo_request_duration_seconds_count{route=\"api_mcp\",status_code=~\"4..|5..\"}[5m])) / clamp_min(sum(rate(tempo_request_duration_seconds_count{route=\"api_mcp\"}[5m])), 0.0001)" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "MCP p95 latency",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "s" } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(tempo_request_duration_seconds_bucket{route=\"api_mcp\"}[5m])))" }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "MCP tool usage",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "MCP calls by tool (rate/s)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 9, "w": 14, "x": 0, "y": 7 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15, "stacking": { "mode": "normal" } }, "unit": "reqps" } },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["sum", "lastNotNull"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum by (tool) (rate(tempo_query_frontend_mcp_calls_total[5m]))", "legendFormat": "{{tool}}" }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Total calls by tool",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 9, "w": 10, "x": 14, "y": 7 },
+      "fieldConfig": { "defaults": { "color": { "mode": "continuous-GrYlRd" }, "unit": "short" } },
+      "options": { "displayMode": "gradient", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum by (tool) (tempo_query_frontend_mcp_calls_total)", "legendFormat": "{{tool}}", "instant": true }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "MCP endpoint (:3200/api/mcp)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by status code (rate/s)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 17 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20, "stacking": { "mode": "normal" } }, "unit": "reqps" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum by (status_code) (rate(tempo_request_duration_seconds_count{route=\"api_mcp\"}[5m]))", "legendFormat": "{{status_code}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by method (rate/s)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 17 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20 }, "unit": "reqps" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum by (method) (rate(tempo_request_duration_seconds_count{route=\"api_mcp\"}[5m]))", "legendFormat": "{{method}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Endpoint latency (p50 / p95 / p99)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 17 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "s" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(tempo_request_duration_seconds_bucket{route=\"api_mcp\"}[5m])))", "legendFormat": "p50" },
+        { "refId": "B", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(tempo_request_duration_seconds_bucket{route=\"api_mcp\"}[5m])))", "legendFormat": "p95" },
+        { "refId": "C", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(tempo_request_duration_seconds_bucket{route=\"api_mcp\"}[5m])))", "legendFormat": "p99" }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Tool usage (cumulative)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 25 },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } } },
+      "options": { "showHeader": true },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+          "expr": "sum by (tool) (tempo_query_frontend_mcp_calls_total)", "legendFormat": "{{tool}}", "instant": true, "format": "table" }
+      ],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "Value": "calls" } } },
+        { "id": "sortBy", "options": { "fields": {}, "sort": [{ "field": "calls", "desc": true }] } }
+      ]
+    }
+  ]
+}

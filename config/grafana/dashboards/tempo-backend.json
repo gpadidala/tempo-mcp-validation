@@ -1,0 +1,132 @@
+{
+  "uid": "tempo-backend",
+  "title": "Tempo Backend (Query & Ingest)",
+  "tags": ["tempo", "backend"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "tenant",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(tempo_query_frontend_queries_total, tenant)",
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Query path",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Queries per tenant (rate/s)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "reqps" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (tenant) (rate(tempo_query_frontend_queries_total{tenant=~\"$tenant\"}[5m]))", "legendFormat": "{{tenant}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queries within SLO (ratio)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "percentunit", "min": 0, "max": 1 } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(tempo_query_frontend_queries_within_slo_total{tenant=~\"$tenant\"}[5m])) / clamp_min(sum(rate(tempo_query_frontend_queries_total{tenant=~\"$tenant\"}[5m])), 0.0001)", "legendFormat": "within SLO" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Bytes inspected per tenant (rate)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 9 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "Bps" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (tenant) (rate(tempo_query_frontend_bytes_inspected_total{tenant=~\"$tenant\"}[5m]))", "legendFormat": "{{tenant}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Frontend queue length",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 9 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "short" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(tempo_query_frontend_queue_length)", "legendFormat": "queued" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue duration p95",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 9 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "s" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(tempo_query_frontend_queue_duration_seconds_bucket[5m])))", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Ingest path",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Spans received per tenant (rate/s)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 18 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "short" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (tenant) (rate(tempo_distributor_spans_received_total{tenant=~\"$tenant\"}[5m]))", "legendFormat": "{{tenant}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Live traces per tenant",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15 }, "unit": "short" } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (tenant) (tempo_ingester_live_traces{tenant=~\"$tenant\"})", "legendFormat": "{{tenant}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Discarded spans (rate limiting etc.)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 18 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20 }, "unit": "short" } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (tenant, reason) (rate(tempo_discarded_spans_total{tenant=~\"$tenant\"}[5m]))", "legendFormat": "{{tenant}} / {{reason}}" }
+      ]
+    }
+  ]
+}

@@ -70,6 +70,11 @@ report: ## Regenerate docs/validation-matrix.md from the live server
 claude-add: ## Register the Tempo MCP server with Claude Code
 	claude mcp add --transport=http tempo http://localhost:3200/api/mcp
 
+.PHONY: dashboards
+dashboards: ## Print the Grafana dashboard URLs (auto-provisioned)
+	@echo "Tempo MCP Server: http://localhost:3000/d/tempo-mcp-server/tempo-mcp-server"
+	@echo "Tempo Backend:    http://localhost:3000/d/tempo-backend/tempo-backend-query-and-ingest"
+
 .PHONY: all
 all: up seed discover validate usecases ## Full pipeline on a fresh clone
 

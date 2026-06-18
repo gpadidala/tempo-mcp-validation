@@ -39,6 +39,18 @@ Or everything at once on a fresh clone:
 make all
 ```
 
+**No `make`?** (corporate / Windows laptops) Use the cross-platform Python runner —
+same targets, only Python + Docker required:
+
+```bash
+python tasks.py all          # = make all
+python tasks.py up seed       # run several in order
+./run.sh all                  # macOS/Linux wrapper
+.\run.ps1 all                 # Windows PowerShell wrapper
+```
+
+See [docs/RUNNING.md](docs/RUNNING.md) for every option (incl. raw commands).
+
 ## What's where
 
 | Path | Purpose |
@@ -56,7 +68,8 @@ make all
 
 - Tempo MCP: `http://localhost:3200/api/mcp`  (needs `X-Scope-OrgID`)
 - Tempo HTTP API: `http://localhost:3200`
-- Grafana: `http://localhost:3000`  (anonymous admin, Explore → Tempo)
+- Grafana: `http://localhost:3000`  (anonymous admin; Explore → Tempo, plus the
+  auto-provisioned **Tempo MCP** dashboards — see [docs/dashboards.md](docs/dashboards.md))
 - Prometheus: `http://localhost:9090`
 
 ## Use it from Claude Code / Inspector
@@ -89,6 +102,11 @@ Against Tempo 2.10.7 on a clean stack:
 - **[docs/e2e-walkthrough.md](docs/e2e-walkthrough.md) — screenshot-by-screenshot
   end-to-end run** (MCP Inspector + Grafana + the test suite), captured live with
   Playwright via [`scripts/capture_e2e.py`](scripts/capture_e2e.py).
+- [docs/dashboards.md](docs/dashboards.md) — **Grafana dashboards** that monitor the
+  MCP server (per-tool call rate, endpoint latency/errors) + Tempo backend; they
+  auto-provision into Grafana.
+- [docs/RUNNING.md](docs/RUNNING.md) — `make` and **`make`-free** ways to run
+  everything (Python runner, shell/PowerShell wrappers, raw commands).
 - [docs/runbook.md](docs/runbook.md) — operations, endpoints, troubleshooting, E2E.
 - [docs/architecture.svg](docs/architecture.svg) — client → `/api/mcp` → tool → store → report.
 - [docs/adr/](docs/adr/) — decisions: runtime discovery, parity, searchability,
