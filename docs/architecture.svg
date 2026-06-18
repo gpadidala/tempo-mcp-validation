@@ -1,90 +1,106 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
     </marker>
     <style>
-      .lbl { fill:#0f172a; font-size:14px; font-weight:600; }
-      .sub { fill:#334155; font-size:11px; }
-      .tag { fill:#475569; font-size:11px; font-style:italic; }
-      .edge { stroke:#475569; stroke-width:2; fill:none; marker-end:url(#arrow); }
-      .legend { fill:#0f172a; font-size:12px; }
+      .title { fill:#0f172a; font-size:26px; font-weight:800; }
+      .sub   { fill:#475569; font-size:14px; }
+      .lbl   { fill:#0f172a; font-size:16px; font-weight:700; }
+      .desc  { fill:#334155; font-size:12.5px; }
+      .tag   { fill:#64748b; font-size:11.5px; font-style:italic; }
+      .edge  { stroke:#64748b; stroke-width:2.5; fill:none; marker-end:url(#arrow); }
+      .edged { stroke:#94a3b8; stroke-width:2; fill:none; stroke-dasharray:6 5; marker-end:url(#arrowd); }
+      .elabel{ fill:#475569; font-size:12px; font-weight:600; }
+      .leg   { fill:#0f172a; font-size:13px; }
     </style>
   </defs>
 
-  <rect x="0" y="0" width="960" height="520" fill="#f8fafc"/>
-  <text x="32" y="40" fill="#0f172a" font-size="22" font-weight="700">Tempo native MCP server — validation harness</text>
-  <text x="32" y="62" class="sub">client → /api/mcp (router) → MCP tool → Tempo query → store → result → validation report</text>
+  <rect x="0" y="0" width="1280" height="620" fill="#f8fafc"/>
+  <text x="40" y="52" class="title">Tempo native MCP server — validation harness</text>
+  <text x="40" y="78" class="sub">reasoning client  →  /api/mcp (router)  →  MCP tool  →  Tempo query  →  trace store  →  result  →  validation report</text>
 
-  <!-- Teal: LLM/reasoning client -->
-  <rect x="32" y="110" width="190" height="92" rx="12" fill="#ccfbf1" stroke="#14b8a6" stroke-width="2"/>
-  <text x="48" y="140" class="lbl">Reasoning client</text>
-  <text x="48" y="160" class="sub">Claude Code · MCP Inspector</text>
-  <text x="48" y="178" class="sub">async MCP client (this repo)</text>
-  <text x="48" y="194" class="tag">teal = LLM / reasoning</text>
+  <!-- Teal: reasoning client -->
+  <rect x="40" y="120" width="230" height="120" rx="14" fill="#ccfbf1" stroke="#14b8a6" stroke-width="2.5"/>
+  <text x="60" y="152" class="lbl">Reasoning client</text>
+  <text x="60" y="176" class="desc">Claude Code · MCP Inspector</text>
+  <text x="60" y="196" class="desc">async MCP client (this repo)</text>
+  <text x="60" y="224" class="tag">teal · LLM / reasoning</text>
 
-  <!-- Blue: router / query-frontend /api/mcp -->
-  <rect x="300" y="110" width="190" height="92" rx="12" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
-  <text x="316" y="140" class="lbl">:3200/api/mcp</text>
-  <text x="316" y="160" class="sub">query-frontend</text>
-  <text x="316" y="178" class="sub">streamable HTTP · X-Scope-OrgID</text>
-  <text x="316" y="194" class="tag">blue = router</text>
+  <!-- Blue: router -->
+  <rect x="350" y="120" width="230" height="120" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2.5"/>
+  <text x="370" y="152" class="lbl">:3200/api/mcp</text>
+  <text x="370" y="176" class="desc">query-frontend</text>
+  <text x="370" y="196" class="desc">streamable HTTP · X-Scope-OrgID</text>
+  <text x="370" y="224" class="tag">blue · router</text>
 
   <!-- Amber: MCP tools -->
-  <rect x="568" y="92" width="200" height="128" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
-  <text x="584" y="120" class="lbl">MCP tools</text>
-  <text x="584" y="140" class="sub">traceql-search · get-trace</text>
-  <text x="584" y="156" class="sub">get-attribute-names / values</text>
-  <text x="584" y="172" class="sub">traceql-metrics-instant / range</text>
-  <text x="584" y="188" class="sub">docs-traceql</text>
-  <text x="584" y="208" class="tag">amber = MCP tools (discovered)</text>
+  <rect x="660" y="108" width="250" height="160" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2.5"/>
+  <text x="680" y="140" class="lbl">MCP tools (7)</text>
+  <text x="680" y="164" class="desc">traceql-search · get-trace</text>
+  <text x="680" y="184" class="desc">get-attribute-names / values</text>
+  <text x="680" y="204" class="desc">traceql-metrics-instant / range</text>
+  <text x="680" y="224" class="desc">docs-traceql</text>
+  <text x="680" y="252" class="tag">amber · discovered at runtime</text>
 
   <!-- Violet: data store -->
-  <rect x="568" y="270" width="200" height="100" rx="12" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
-  <text x="584" y="300" class="lbl">Tempo store</text>
-  <text x="584" y="320" class="sub">ingester + local trace blocks</text>
-  <text x="584" y="338" class="sub">tenant-a · tenant-b (isolated)</text>
-  <text x="584" y="356" class="tag">violet = data</text>
+  <rect x="990" y="120" width="250" height="120" rx="14" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/>
+  <text x="1010" y="152" class="lbl">Tempo store</text>
+  <text x="1010" y="176" class="desc">ingester + local trace blocks</text>
+  <text x="1010" y="196" class="desc">tenant-a · tenant-b (isolated)</text>
+  <text x="1010" y="224" class="tag">violet · data</text>
 
   <!-- Green: validation report -->
-  <rect x="300" y="282" width="190" height="92" rx="12" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
-  <text x="316" y="312" class="lbl">Validation report</text>
-  <text x="316" y="332" class="sub">pytest · usecases.md</text>
-  <text x="316" y="350" class="sub">validation-matrix.md · JUnit</text>
-  <text x="316" y="366" class="tag">green = output</text>
+  <rect x="350" y="360" width="230" height="120" rx="14" fill="#dcfce7" stroke="#22c55e" stroke-width="2.5"/>
+  <text x="370" y="392" class="lbl">Validation report</text>
+  <text x="370" y="416" class="desc">37 pytest · 9 use cases</text>
+  <text x="370" y="436" class="desc">validation-matrix · JUnit</text>
+  <text x="370" y="464" class="tag">green · output</text>
 
   <!-- Coral: human gate -->
-  <rect x="32" y="282" width="190" height="92" rx="12" fill="#ffe4e6" stroke="#fb7185" stroke-width="2"/>
-  <text x="48" y="312" class="lbl">Human E2E gate</text>
-  <text x="48" y="332" class="sub">claude mcp add · transcripts</text>
-  <text x="48" y="350" class="sub">reviews report before trust</text>
-  <text x="48" y="366" class="tag">coral = human gate</text>
+  <rect x="40" y="360" width="230" height="120" rx="14" fill="#ffe4e6" stroke="#fb7185" stroke-width="2.5"/>
+  <text x="60" y="392" class="lbl">Human E2E gate</text>
+  <text x="60" y="416" class="desc">claude mcp add · transcripts</text>
+  <text x="60" y="436" class="desc">reviews report before trust</text>
+  <text x="60" y="464" class="tag">coral · human gate</text>
 
-  <!-- Parity reference -->
-  <rect x="820" y="180" width="120" height="92" rx="12" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
-  <text x="836" y="208" class="lbl" font-size="13">Direct API</text>
-  <text x="836" y="226" class="sub">/api/search …</text>
-  <text x="836" y="242" class="sub">parity oracle</text>
-  <text x="836" y="262" class="tag">≡ compare</text>
+  <!-- Direct API parity oracle -->
+  <rect x="990" y="360" width="250" height="120" rx="14" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="7 5"/>
+  <text x="1010" y="392" class="lbl">Direct Tempo API</text>
+  <text x="1010" y="416" class="desc">/api/search · /api/v2/traces …</text>
+  <text x="1010" y="436" class="desc">parity oracle (≡ compare)</text>
+  <text x="1010" y="464" class="tag">grey · reference</text>
 
-  <!-- edges -->
-  <path class="edge" d="M222,156 L300,156"/>
-  <path class="edge" d="M490,150 L568,150"/>
-  <path class="edge" d="M668,220 L668,270"/>
-  <text x="676" y="250" class="sub">TraceQL query</text>
-  <path class="edge" d="M568,330 L490,330"/>
-  <text x="500" y="270" class="sub">results → assert</text>
-  <path class="edge" d="M300,328 L222,328"/>
-  <!-- parity compare (dashed) -->
-  <path d="M768,200 L820,210" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end:url(#arrow)/>
-  <path d="M820,250 C720,300 700,300 668,300" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
+  <!-- flow edges -->
+  <path class="edge" d="M270,180 L350,180"/>
+  <path class="edge" d="M580,178 L660,178"/>
+  <text x="600" y="168" class="elabel">tools/call</text>
+  <path class="edge" d="M910,168 L990,168"/>
+  <text x="918" y="158" class="elabel">TraceQL</text>
+  <!-- store back to tools (result) -->
+  <path class="edge" d="M1115,240 L1115,300 L785,300 L785,268"/>
+  <text x="900" y="292" class="elabel">trace results</text>
+  <!-- tools/router down to report -->
+  <path class="edge" d="M465,240 L465,360"/>
+  <text x="475" y="320" class="elabel">assert vs ground truth</text>
+  <!-- report to human gate -->
+  <path class="edge" d="M350,420 L270,420"/>
+  <!-- parity: report compares to direct API -->
+  <path class="edged" d="M580,440 L990,430"/>
+  <text x="720" y="424" class="elabel">parity ≡</text>
+  <!-- direct API to store -->
+  <path class="edged" d="M1115,360 L1115,240"/>
 
   <!-- legend -->
-  <text x="32" y="430" class="legend" font-weight="700">Color system</text>
-  <rect x="32" y="442" width="16" height="16" rx="3" fill="#ccfbf1" stroke="#14b8a6"/><text x="54" y="455" class="legend">reasoning client</text>
-  <rect x="190" y="442" width="16" height="16" rx="3" fill="#dbeafe" stroke="#3b82f6"/><text x="212" y="455" class="legend">router</text>
-  <rect x="300" y="442" width="16" height="16" rx="3" fill="#fef3c7" stroke="#f59e0b"/><text x="322" y="455" class="legend">MCP tools</text>
-  <rect x="420" y="442" width="16" height="16" rx="3" fill="#ede9fe" stroke="#8b5cf6"/><text x="442" y="455" class="legend">data</text>
-  <rect x="500" y="442" width="16" height="16" rx="3" fill="#dcfce7" stroke="#22c55e"/><text x="522" y="455" class="legend">output</text>
-  <rect x="600" y="442" width="16" height="16" rx="3" fill="#ffe4e6" stroke="#fb7185"/><text x="622" y="455" class="legend">human gate</text>
+  <text x="40" y="540" class="leg" font-weight="800">Color system</text>
+  <rect x="40" y="552" width="16" height="16" rx="3" fill="#ccfbf1" stroke="#14b8a6"/><text x="62" y="565" class="leg">reasoning client</text>
+  <rect x="200" y="552" width="16" height="16" rx="3" fill="#dbeafe" stroke="#3b82f6"/><text x="222" y="565" class="leg">router</text>
+  <rect x="300" y="552" width="16" height="16" rx="3" fill="#fef3c7" stroke="#f59e0b"/><text x="322" y="565" class="leg">MCP tools</text>
+  <rect x="420" y="552" width="16" height="16" rx="3" fill="#ede9fe" stroke="#8b5cf6"/><text x="442" y="565" class="leg">data</text>
+  <rect x="510" y="552" width="16" height="16" rx="3" fill="#dcfce7" stroke="#22c55e"/><text x="532" y="565" class="leg">output</text>
+  <rect x="610" y="552" width="16" height="16" rx="3" fill="#ffe4e6" stroke="#fb7185"/><text x="632" y="565" class="leg">human gate</text>
+  <rect x="730" y="552" width="16" height="16" rx="3" fill="#f1f5f9" stroke="#94a3b8"/><text x="752" y="565" class="leg">parity reference</text>
 </svg>
