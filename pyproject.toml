@@ -31,3 +31,8 @@ filterwarnings = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[dependency-groups]
+dev = [
+    "playwright>=1.60.0",
+]

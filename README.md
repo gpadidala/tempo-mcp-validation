@@ -86,6 +86,9 @@ Against Tempo 2.10.7 on a clean stack:
 
 ## Docs
 
+- **[docs/e2e-walkthrough.md](docs/e2e-walkthrough.md) — screenshot-by-screenshot
+  end-to-end run** (MCP Inspector + Grafana + the test suite), captured live with
+  Playwright via [`scripts/capture_e2e.py`](scripts/capture_e2e.py).
 - [docs/runbook.md](docs/runbook.md) — operations, endpoints, troubleshooting, E2E.
 - [docs/architecture.svg](docs/architecture.svg) — client → `/api/mcp` → tool → store → report.
 - [docs/adr/](docs/adr/) — decisions: runtime discovery, parity, searchability,
