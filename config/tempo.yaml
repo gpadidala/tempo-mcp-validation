@@ -35,9 +35,13 @@ distributor:
           endpoint: 0.0.0.0:4318
 
 ingester:
-  # Flush quickly so seeded traces are queryable within seconds, not minutes.
-  max_block_duration: 5m
-  complete_block_timeout: 10s
+  # Keep completed blocks resident in the ingester for the whole dev session so
+  # seeded traces stay searchable end-to-end. (A short complete_block_timeout
+  # would drop flushed traces from search before the backend blocklist poll
+  # picks them up, creating a window where seeded data vanishes.)
+  max_block_duration: 30m
+  complete_block_timeout: 1h
+  trace_idle_period: 10s
 
 compactor:
   compaction:
@@ -61,6 +65,9 @@ metrics_generator:
 storage:
   trace:
     backend: local
+    # Poll the backend blocklist frequently so flushed blocks become searchable
+    # quickly (default is 5m, which is too slow for a fast seed→validate loop).
+    blocklist_poll: 1m
     wal:
       path: /var/tempo/wal
     local:

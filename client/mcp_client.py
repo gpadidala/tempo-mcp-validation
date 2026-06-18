@@ -18,6 +18,9 @@ from typing import Any
 
 import structlog
 from mcp import ClientSession
+# streamablehttp_client carries a deprecation note in newer SDKs, but its
+# successor dropped the `headers=` kwarg we need for X-Scope-OrgID, so we stay
+# on this one until the replacement supports per-request headers.
 from mcp.client.streamable_http import streamablehttp_client
 
 log = structlog.get_logger()

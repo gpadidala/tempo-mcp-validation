@@ -37,7 +37,12 @@ MS = 1_000_000  # nanoseconds per millisecond
 
 
 def _hex(prefix: str, nbytes: int) -> str:
-    return hashlib.sha256(prefix.encode()).hexdigest()[: nbytes * 2]
+    # Force a non-zero leading nibble: Tempo strips leading zero bytes when it
+    # renders trace/span IDs back as strings, which would break exact-ID
+    # comparisons against this ground truth. Keeping the high nibble non-zero
+    # makes the string form stable and round-trips through get-trace cleanly.
+    h = hashlib.sha256(prefix.encode()).hexdigest()[: nbytes * 2]
+    return ("a" + h[1:]) if h[0] == "0" else h
 
 
 def trace_id(name: str) -> str:
@@ -244,6 +249,30 @@ def push(tenant: str, resource_spans: list[dict]) -> None:
     raise RuntimeError(f"ingestion never succeeded for {tenant}") from last_exc
 
 
+def wait_for_searchable(tenant: str, trace_id: str, timeout_s: int = 90) -> bool:
+    """Block until a seeded trace is search-indexed (not just ingested).
+
+    Tempo makes spans retrievable by ID almost immediately but search/tag
+    indexing lags ~20-30s. The use-case + parity suites depend on search, so we
+    gate `make seed` on searchability to keep `make seed && make validate`
+    reliable on a fresh clone.
+    """
+    api = f"{os.environ.get('TEMPO_API_URL', 'http://localhost:3200')}/api/search"
+    headers = {"X-Scope-OrgID": tenant}
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        try:
+            r = httpx.get(api, params={"q": '{ duration > 1s }'}, headers=headers, timeout=15)
+            if r.status_code == 200:
+                ids = {t.get("traceID") for t in r.json().get("traces", [])}
+                if trace_id in ids:
+                    return True
+        except httpx.HTTPError:
+            pass
+        time.sleep(3)
+    return False
+
+
 def main() -> int:
     now_ns = time.time_ns()
     print(f"seeding traces to {OTLP_HTTP_URL} (now={now_ns})")
@@ -259,6 +288,13 @@ def main() -> int:
     print(f"\nwrote ground-truth fixture -> {EXPECTED_PATH}")
     print(f"  tenant-a: {fix_a['trace_count']} traces across {len(fix_a['services'])} services")
     print(f"  tenant-b: {fix_b['trace_count']} traces (isolation)")
+
+    print("\nwaiting for search indexing to catch up ...")
+    slow_id = fix_a["slow_trace_ids"][0]
+    if wait_for_searchable(TENANT_A, slow_id):
+        print("  traces are search-indexed; ready to validate.")
+        return 0
+    print("  WARNING: traces not search-indexed within timeout; validation may be flaky.")
     return 0
 
 

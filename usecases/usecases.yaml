@@ -1,0 +1,59 @@
+# Use-case catalog. Each entry is a natural tracing goal -> the MCP tool(s) it
+# exercises -> the assertion against seeded ground truth (seed/expected.json).
+# The runner (usecases/runner.py) implements each id and emits a pass/fail
+# report. Prose here drives the report's "goal/expected" columns; the runner
+# does the real call + assert.
+usecases:
+  - id: find-slow
+    goal: Find slow requests — traces with duration > 1s in service checkout.
+    tools: [traceql-search]
+    query: '{ resource.service.name = "checkout" && duration > 1s }'
+    expected: Returns exactly the seeded slow trace(s); the 120ms error trace is excluded.
+
+  - id: find-errors
+    goal: Find errors — spans with status = error in the last window.
+    tools: [traceql-search]
+    query: '{ status = error }'
+    expected: Returns exactly the seeded error trace(s).
+
+  - id: trace-by-id
+    goal: Fetch a known trace by ID and get the full span tree.
+    tools: [get-trace]
+    query: '<slow trace id>'
+    expected: Returns the trace with its 2 spans intact (root + db child).
+
+  - id: discover-queryable
+    goal: Discover what's queryable — tag names, then values for service.name.
+    tools: [get-attribute-names, get-attribute-values]
+    query: 'resource.service.name'
+    expected: Tag values include every seeded service.
+
+  - id: service-filter
+    goal: Service-level filter — all traces from frontend.
+    tools: [traceql-search]
+    query: '{ resource.service.name = "frontend" }'
+    expected: Trace count matches ground truth (frontend root + multiservice graph).
+
+  - id: traceql-metrics
+    goal: TraceQL metrics — rate over a span set (skipped if tool not exposed).
+    tools: [traceql-metrics-instant]
+    query: '{} | rate()'
+    expected: A sane, non-empty metric series.
+
+  - id: empty-result
+    goal: A query that legitimately matches nothing returns a clean empty result.
+    tools: [traceql-search]
+    query: '{ resource.service.name = "does-not-exist-xyz" }'
+    expected: Empty traces list, isError = false (not an error).
+
+  - id: tenant-isolation
+    goal: Same query under tenant-a vs tenant-b — each sees only its own traces.
+    tools: [traceql-search]
+    query: '{ resource.service.name = "billing" }'
+    expected: tenant-a sees 0 (billing is tenant-b only); tenant-b sees its 2 traces.
+
+  - id: bad-input
+    goal: Malformed TraceQL yields a well-formed MCP error envelope, not a crash.
+    tools: [traceql-search]
+    query: '{ this is not valid'
+    expected: isError = true with a parse-error message; the session stays usable.

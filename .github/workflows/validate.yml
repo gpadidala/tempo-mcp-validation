@@ -1,0 +1,79 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: uv sync --extra dev
+
+      - name: Create .env
+        run: cp .env.example .env
+
+      - name: Start Tempo (MCP on) + Prometheus
+        run: docker compose up -d tempo prometheus
+
+      - name: Wait for Tempo /ready
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3200/ready >/dev/null 2>&1 && echo ready && exit 0
+            sleep 2
+          done
+          echo "Tempo did not become ready"; docker compose logs tempo; exit 1
+
+      - name: Seed ground-truth traces (blocks until searchable)
+        run: uv run python -m seed.generate_traces
+
+      - name: Discover tools + drift-check against committed snapshot
+        run: |
+          uv run python -m client.discover
+          # Fail the build if the live tool set drifted from the snapshot in git.
+          if ! git diff --quiet -- tools_snapshot.json; then
+            echo "::error::Tool drift detected — tools_snapshot.json changed."
+            git --no-pager diff -- tools_snapshot.json
+            exit 1
+          fi
+
+      - name: Run validation suite (pytest)
+        run: uv run pytest -q --junitxml=reports/junit.xml
+
+      - name: Run use-case catalog + regenerate matrix
+        run: uv run python -m usecases.runner
+
+      - name: Upload reports + matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-artifacts
+          path: |
+            reports/junit.xml
+            reports/usecases.md
+            reports/usecases.json
+            docs/validation-matrix.md
+            tools_snapshot.json
+
+      - name: Publish test summary
+        if: always()
+        run: |
+          {
+            echo "## Use-case acceptance report"
+            cat reports/usecases.md 2>/dev/null || echo "(no use-case report)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
